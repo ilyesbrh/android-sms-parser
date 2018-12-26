@@ -11,10 +11,8 @@ import android.view.View;
 import android.widget.EditText;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
@@ -23,7 +21,7 @@ import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "test" ;
+    private static final String TAG = "test";
     private EditText editTextInput;
 
     @Override
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendMessege(View v) {
 
-        WriteToFile("phoneNumber",editTextInput.getText().toString());
+        WriteToFile("phoneNumber", editTextInput.getText().toString());
     }
 
 
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
         String sReflectedClassName = "com.android.internal.telephony.GsmAlphabet";
         Class cReflectedNFCExtras = Class.forName(sReflectedClassName);
-        Method stringToGsm7BitPacked = cReflectedNFCExtras.getMethod("stringToGsm7BitPacked", new Class[] { String.class });
+        Method stringToGsm7BitPacked = cReflectedNFCExtras.getMethod("stringToGsm7BitPacked", String.class);
         stringToGsm7BitPacked.setAccessible(true);
         byte[] bodybytes = (byte[]) stringToGsm7BitPacked.invoke(null, body);
         bo.write(bodybytes);
@@ -111,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
     private void broadcastSmsReceived(Context context, byte[] pdu) {
         Intent intent = new Intent();
         intent.setAction("android.provider.Telephony.SMS_RECEIVED");
-        intent.putExtra("pdus", new Object[] { pdu });
+        intent.putExtra("pdus", new Object[]{pdu});
         context.sendBroadcast(intent);
     }
 
@@ -119,16 +117,16 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setClassName("com.android.mms", "com.android.mms.transaction.SmsReceiverService");
         intent.setAction("android.provider.Telephony.SMS_RECEIVED");
-        intent.putExtra("pdus", new Object[] { pdu });
+        intent.putExtra("pdus", new Object[]{pdu});
         intent.putExtra("format", "3gpp");
         context.startService(intent);
     }
 
-    public void WriteToFile(String fileName ,String s){
+    public void WriteToFile(String fileName, String s) {
 
-        FileOutputStream out= null;
+        FileOutputStream out = null;
         try {
-            out = openFileOutput(fileName,MODE_PRIVATE);
+            out = openFileOutput(fileName, MODE_PRIVATE);
             OutputStreamWriter sw = new OutputStreamWriter(out);
             sw.write(s);
             sw.flush();
@@ -137,18 +135,19 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-    public String ReadFromFile(String fileName ){
+
+    public String ReadFromFile(String fileName) {
 
         try {
             FileInputStream in = openFileInput(fileName);
             InputStreamReader sr = new InputStreamReader(in);
-            String s="";
-            char[] charTab= new char[100];
+            String s = "";
+            char[] charTab = new char[100];
 
             int read = sr.read(charTab);
 
-            if(read > 0){
-                return String.copyValueOf(charTab,0,read);
+            if (read > 0) {
+                return String.copyValueOf(charTab, 0, read);
             }
             return s;
 

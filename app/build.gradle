@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.joaquimley.smsparsing"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -19,4 +19,6 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:27.1.0'
+    compile 'com.android.volley:volley:1.1.1'
+
 }

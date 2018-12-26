@@ -1,138 +1,164 @@
 package com.joaquimley.smsparsing;
 
-import android.Manifest;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Method;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
-    private static final String TAG = "MainActivity";
-    private static final String PREF_USER_MOBILE_PHONE = "pref_user_mobile_phone";
-    private static final int SMS_PERMISSION_CODE = 0;
+public class MainActivity extends AppCompatActivity {
 
-    private EditText mNumberEditText;
-    private String mUserMobilePhone;
-    private SharedPreferences mSharedPreferences;
+    private static final String TAG = "test" ;
+    private EditText editTextInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (!hasReadSmsPermission()) {
-            showRequestPermissionsInfoAlertDialog();
-        }
 
-        initViews();
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mUserMobilePhone = mSharedPreferences.getString(PREF_USER_MOBILE_PHONE, "");
-        if (!TextUtils.isEmpty(mUserMobilePhone)) {
-            mNumberEditText.setText(mUserMobilePhone);
-        }
+        editTextInput = findViewById(R.id.edit_text_input);
+        editTextInput.setText(ReadFromFile("phoneNumber"));
+
     }
 
-    private void initViews() {
-        mNumberEditText = (EditText) findViewById(R.id.et_number);
-        findViewById(R.id.btn_normal_sms).setOnClickListener(this);
-        findViewById(R.id.btn_conditional_sms).setOnClickListener(this);
+    public void create(View v) {
+        String input = editTextInput.getText().toString();
+
+        Intent serviceIntent = new Intent(this, SMSService.class);
+        serviceIntent.putExtra("inputExtra", input);
+
+        ContextCompat.startForegroundService(this, serviceIntent);
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_conditional_sms:
-                if (!hasValidPreConditions()) return;
-                checkAndUpdateUserPrefNumber();
-
-                SmsHelper.sendDebugSms(String.valueOf(mNumberEditText.getText()), SmsHelper.SMS_CONDITION + " This SMS is conditional, Hello toast");
-                Toast.makeText(getApplicationContext(), R.string.toast_sending_sms, Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.btn_normal_sms:
-                if (!hasValidPreConditions()) return;
-                checkAndUpdateUserPrefNumber();
-
-                SmsHelper.sendDebugSms(String.valueOf(mNumberEditText.getText()), "The broadcast should not show a toast for this");
-                Toast.makeText(getApplicationContext(), R.string.toast_sending_sms, Toast.LENGTH_SHORT).show();
-                break;
-        }
+    public void cancel(View v) {
+        Intent serviceIntent = new Intent(this, SMSService.class);
+        stopService(serviceIntent);
     }
 
-    /**
-     * Checks if stored SharedPreferences value needs updating and updates \o/
-     */
-    private void checkAndUpdateUserPrefNumber() {
-        if (TextUtils.isEmpty(mUserMobilePhone) && !mUserMobilePhone.equals(mNumberEditText.getText().toString())) {
-            mSharedPreferences
-                    .edit()
-                    .putString(PREF_USER_MOBILE_PHONE, mNumberEditText.getText().toString())
-                    .apply();
-        }
+    public void sendMessege(View v) {
+
+        WriteToFile("phoneNumber",editTextInput.getText().toString());
     }
 
 
-    /**
-     * Validates if the app has readSmsPermissions and the mobile phone is valid
-     *
-     * @return boolean validation value
-     */
-    private boolean hasValidPreConditions() {
-        if (!hasReadSmsPermission()) {
-            requestReadAndSendSmsPermission();
-            return false;
+    private void handleSmsSending(String msg) {
+        try {
+            sendSms(this, "09000000000", msg);
+
+            Log.d(TAG, "Sent the test sms");
+        } catch (Exception e) {
+            Log.d(TAG, "Exception : " + e.getClass() + " : " + e.getMessage());
         }
 
-        if (!SmsHelper.isValidPhoneNumber(mNumberEditText.getText().toString())) {
-            Toast.makeText(getApplicationContext(), R.string.error_invalid_phone_number, Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
     }
 
-    /**
-     * Optional informative alert dialog to explain the user why the app needs the Read/Send SMS permission
-     */
-    private void showRequestPermissionsInfoAlertDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.permission_alert_dialog_title);
-        builder.setMessage(R.string.permission_dialog_message);
-        builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                requestReadAndSendSmsPermission();
+    private void sendSms(Context context, String sender, String body) throws Exception {
+        byte[] pdu = null;
+        byte[] scBytes = PhoneNumberUtils.networkPortionToCalledPartyBCD("0000000000");
+        byte[] senderBytes = PhoneNumberUtils.networkPortionToCalledPartyBCD(sender);
+        int lsmcs = scBytes.length;
+        byte[] dateBytes = new byte[7];
+        Calendar calendar = new GregorianCalendar();
+        dateBytes[0] = reverseByte((byte) (calendar.get(Calendar.YEAR)));
+        dateBytes[1] = reverseByte((byte) (calendar.get(Calendar.MONTH) + 1));
+        dateBytes[2] = reverseByte((byte) (calendar.get(Calendar.DAY_OF_MONTH)));
+        dateBytes[3] = reverseByte((byte) (calendar.get(Calendar.HOUR_OF_DAY)));
+        dateBytes[4] = reverseByte((byte) (calendar.get(Calendar.MINUTE)));
+        dateBytes[5] = reverseByte((byte) (calendar.get(Calendar.SECOND)));
+        dateBytes[6] = reverseByte((byte) ((calendar.get(Calendar.ZONE_OFFSET) +
+                calendar.get(Calendar.DST_OFFSET)) / (60 * 1000 * 15)));
+
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        bo.write(lsmcs);
+        bo.write(scBytes);
+        bo.write(0x04);
+        bo.write((byte) sender.length());
+        bo.write(senderBytes);
+        bo.write(0x00);
+        bo.write(0x00);
+        bo.write(dateBytes);
+
+        String sReflectedClassName = "com.android.internal.telephony.GsmAlphabet";
+        Class cReflectedNFCExtras = Class.forName(sReflectedClassName);
+        Method stringToGsm7BitPacked = cReflectedNFCExtras.getMethod("stringToGsm7BitPacked", new Class[] { String.class });
+        stringToGsm7BitPacked.setAccessible(true);
+        byte[] bodybytes = (byte[]) stringToGsm7BitPacked.invoke(null, body);
+        bo.write(bodybytes);
+        pdu = bo.toByteArray();
+
+        // broadcast the SMS_RECEIVED to registered receivers
+        broadcastSmsReceived(context, pdu);
+
+        // or, directly send the message into the inbox and let the usual SMS handling happen - SMS appearing in Inbox, a notification with sound, etc.
+        startSmsReceiverService(context, pdu);
+    }
+
+    private void broadcastSmsReceived(Context context, byte[] pdu) {
+        Intent intent = new Intent();
+        intent.setAction("android.provider.Telephony.SMS_RECEIVED");
+        intent.putExtra("pdus", new Object[] { pdu });
+        context.sendBroadcast(intent);
+    }
+
+    private void startSmsReceiverService(Context context, byte[] pdu) {
+        Intent intent = new Intent();
+        intent.setClassName("com.android.mms", "com.android.mms.transaction.SmsReceiverService");
+        intent.setAction("android.provider.Telephony.SMS_RECEIVED");
+        intent.putExtra("pdus", new Object[] { pdu });
+        intent.putExtra("format", "3gpp");
+        context.startService(intent);
+    }
+
+    public void WriteToFile(String fileName ,String s){
+
+        FileOutputStream out= null;
+        try {
+            out = openFileOutput(fileName,MODE_PRIVATE);
+            OutputStreamWriter sw = new OutputStreamWriter(out);
+            sw.write(s);
+            sw.flush();
+            out.close();
+        } catch (Exception e) {
+
+        }
+    }
+    public String ReadFromFile(String fileName ){
+
+        try {
+            FileInputStream in = openFileInput(fileName);
+            InputStreamReader sr = new InputStreamReader(in);
+            String s="";
+            char[] charTab= new char[100];
+
+            int read = sr.read(charTab);
+
+            if(read > 0){
+                return String.copyValueOf(charTab,0,read);
             }
-        });
-        builder.show();
-    }
+            return s;
 
-    /**
-     * Runtime permission shenanigans
-     */
-    private boolean hasReadSmsPermission() {
-        return ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestReadAndSendSmsPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_SMS)) {
-            Log.d(TAG, "shouldShowRequestPermissionRationale(), no permission requested");
-            return;
+        } catch (Exception e) {
+            return new String("");
         }
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS},
-                SMS_PERMISSION_CODE);
     }
+
+    private byte reverseByte(byte b) {
+        return (byte) ((b & 0xF0) >> 4 | (b & 0x0F) << 4);
+    }
+
 }

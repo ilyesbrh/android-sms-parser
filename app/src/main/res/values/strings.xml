@@ -2,7 +2,7 @@
     <string name="app_name">SmsParsing</string>
 
     <string name="action_ok">OK</string>
-    <string name="action_send_normal_sms">Send normal SMS</string>
+    <string name="Cancel">Cancel Job</string>
     <string name="action_send_condition_sms">Send Condition SMS</string>
 
     <string name="your_cellphone_number">Your cellphone number:</string>

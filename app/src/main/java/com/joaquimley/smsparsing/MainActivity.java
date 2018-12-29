@@ -1,23 +1,16 @@
 package com.joaquimley.smsparsing;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.PhoneNumberUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,7 +46,52 @@ public class MainActivity extends AppCompatActivity {
         WriteToFile("phoneNumber", editTextInput.getText().toString());
     }
 
+    public void GoToWebView(View view) {
+        Intent intent = new Intent(this,BLSViewActivity.class);
 
+        intent.putExtra("URLbls","");
+        startActivity(intent);
+    }
+
+    public void WriteToFile(String fileName, String s) {
+
+        FileOutputStream out = null;
+        try {
+            out = openFileOutput(fileName, MODE_PRIVATE);
+            OutputStreamWriter sw = new OutputStreamWriter(out);
+            sw.write(s);
+            sw.flush();
+            out.close();
+        } catch (Exception e) {
+
+        }
+    }
+
+    public String ReadFromFile(String fileName) {
+
+        try {
+            FileInputStream in = openFileInput(fileName);
+            InputStreamReader sr = new InputStreamReader(in);
+            String s = "";
+            char[] charTab = new char[100];
+
+            int read = sr.read(charTab);
+
+            if (read > 0) {
+                return String.copyValueOf(charTab, 0, read);
+            }
+            return s;
+
+        } catch (Exception e) {
+            return new String("");
+        }
+    }
+    /*
+    private byte reverseByte(byte b) {
+        return (byte) ((b & 0xF0) >> 4 | (b & 0x0F) << 4);
+    }
+    */
+    /*
     private void handleSmsSending(String msg) {
         try {
             sendSms(this, "09000000000", msg);
@@ -121,43 +159,5 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("format", "3gpp");
         context.startService(intent);
     }
-
-    public void WriteToFile(String fileName, String s) {
-
-        FileOutputStream out = null;
-        try {
-            out = openFileOutput(fileName, MODE_PRIVATE);
-            OutputStreamWriter sw = new OutputStreamWriter(out);
-            sw.write(s);
-            sw.flush();
-            out.close();
-        } catch (Exception e) {
-
-        }
-    }
-
-    public String ReadFromFile(String fileName) {
-
-        try {
-            FileInputStream in = openFileInput(fileName);
-            InputStreamReader sr = new InputStreamReader(in);
-            String s = "";
-            char[] charTab = new char[100];
-
-            int read = sr.read(charTab);
-
-            if (read > 0) {
-                return String.copyValueOf(charTab, 0, read);
-            }
-            return s;
-
-        } catch (Exception e) {
-            return new String("");
-        }
-    }
-
-    private byte reverseByte(byte b) {
-        return (byte) ((b & 0xF0) >> 4 | (b & 0x0F) << 4);
-    }
-
+    */
 }

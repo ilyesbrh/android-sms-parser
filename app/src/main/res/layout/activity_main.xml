@@ -32,5 +32,12 @@
         android:onClick="sendMessege"
         android:text="Save phone number" />
 
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="GoToWebView"
+        android:text="WebView" />
+
 
 </LinearLayout>

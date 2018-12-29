@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".app"
         android:allowBackup="true"
@@ -23,25 +24,20 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="SmsBroadcastReceiver">
-
+        <receiver android:name=".SmsBroadcastReceiver">
             <intent-filter android:priority="1000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="setPhone" />
-
             </intent-filter>
-
         </receiver>
 
         <service android:name=".SMSService">
-
             <intent-filter>
-                <action android:name=".SmsBroadcastReceiver"/>
+                <action android:name=".SmsBroadcastReceiver" />
             </intent-filter>
-
         </service>
 
-
+        <activity android:name=".BLSViewActivity"></activity>
     </application>
 
 </manifest>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,34 +9,90 @@
     tools:context=".MainActivity">
 
     <EditText
-        android:id="@+id/edit_text_input"
+        android:id="@+id/tele"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Input" />
+        android:hint="Numero telephone" />
 
-    <Button
+    <EditText
+        android:id="@+id/addr"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="create"
-        android:text="Start Service" />
+        android:hint="Adress server" />
 
-    <Button
+    <EditText
+        android:id="@+id/word"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="cancel"
-        android:text="Stop Service" />
+        android:hint="verification word" />
+
+    <EditText
+        android:id="@+id/pos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Numero du Mot clé"
+        android:inputType="number" />
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="sendMessege"
-        android:text="Save phone number" />
+        android:text="Save" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/Button2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="GoToWebView"
-        android:text="WebView" />
+        android:onClick="ReSend"
+        android:text="send Code" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="create"
+            android:text="Start Service" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="cancel"
+            android:text="Stop Service" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="GoToWebView"
+            android:text="WebView" />
+
+        <Button
+            android:id="@+id/Settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="GoToSettings"
+            android:text="Settings" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Code" />
 
 
 </LinearLayout>

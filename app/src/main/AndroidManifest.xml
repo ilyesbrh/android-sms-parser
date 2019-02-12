@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.joaquimley.smsparsing">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -37,7 +36,8 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".BLSViewActivity"></activity>
+        <activity android:name=".BLSViewActivity" />
+        <activity android:name=".SettingsActivity" />
     </application>
 
 </manifest>

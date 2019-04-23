@@ -15,12 +15,6 @@
         android:hint="Numero telephone" />
 
     <EditText
-        android:id="@+id/addr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Adress server" />
-
-    <EditText
         android:id="@+id/word"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,28 +58,6 @@
             android:layout_weight="1"
             android:onClick="cancel"
             android:text="Stop Service" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="GoToWebView"
-            android:text="WebView" />
-
-        <Button
-            android:id="@+id/Settings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="GoToSettings"
-            android:text="Settings" />
     </LinearLayout>
 
     <EditText
